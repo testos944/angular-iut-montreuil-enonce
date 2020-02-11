@@ -1,0 +1,14 @@
+.about {
+  font-size: 10px;
+  text-align: center;
+}
+
+.text {
+  margin-top: 50px;
+  width: 100%;
+  min-height: 500px;
+}
+
+.header {
+  text-align: center;
+}

@@ -1,0 +1,13 @@
+<mat-list>
+  <mat-list-item *ngFor="let employee of employees$ | async">
+    <mat-icon matListIcon>person</mat-icon>
+    <h3 matLine> {{employee.lastname}} {{employee.name}} </h3>
+    <p matLine>
+      <span> {{employee.adress}} </span>
+      <span> {{employee.city}} </span>
+    </p>
+    <button mat-button (click)="deleteEmployee(employee)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
