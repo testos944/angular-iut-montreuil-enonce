@@ -14,7 +14,7 @@ import { EmployeeListComponent } from './employee-list/employee-list.component';
 import { HomeComponent } from './home/home.component';
 import { RouterModule } from '@angular/router';
 import appRoutes from './app.routing';
-import { EmployeeService } from 'src/services/employee.service';
+import { EmployeeService } from '../services/employee.service';
 
 @NgModule({
   declarations: [
