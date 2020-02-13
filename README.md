@@ -237,3 +237,11 @@ Il faut aussi ajouter un bouton sur la liste des employés qui nous fasse aller 
 - employee-create et employee-edit sont toujours les composants utilisés dans les routes
 
 > C'est la base de l'architecture des composants, employee-form est un dumb component, c'est à dire passif. Il n'a pas à savoir comment les données lui sont passées. Les deux autres composants sont des smart components, qui ne font que retrouver la donnée, mais ils ne s'occupent pas du côté présentation (c'est le dumb component qui s'en occupe).
+
+> Indice: vous aurez besoin du two-way data binding de angular: https://angular.io/guide/template-syntax#two-way-binding-
+
+En effet, employee-create et employee-edit auront un "enfant" composant employee-form.
+
+Dans employee form, vous devrez utiliser @Input() et @Output()...
+Dans les parents, quelequchose comme ceci: ```<app-employee-form [(employee)]="getEmployee()"></app-employee-form> ```
+Le getEmployee() doit être différent pour le employee-create-component et le employee-edit-componet
