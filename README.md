@@ -302,7 +302,11 @@ Pour cette partie, vous avez déjà des exemples de code de tout ce qui est néc
 On veut pouvoir traquer nos employés. Nous allons pour cela utiliser une librairie tierce qui s'appelle Highcharts. Il faut notamment:
 - Avoir un Pie Chart https://www.highcharts.com/demo/pie-legend qui montre les répartition par ville des employés. N'hesitez pas à changer les villes comme cela vous change dans le fichier employees.json pour avoir des trucs différents de la génération par défaut.
 - Avoir un line chart (https://www.highcharts.com/demo/line-labels) avec en en abscisse les années de naissance des employés et en ordonnée la quantité de ceux ci. Il faut une ligne pour les hommes et une pour les femmes. Bonus: ajouter un bouton pour pouvoir merge les hommes et les femmes sur le line chart pour n'avoir qu'une seule ligne.
-- Avoir une stacked area (https://www.highcharts.com/demo/area-stacked) qui permet de montrer le cout total des salaires en fonction de la répartition des employés dans 4 buckets d'âge [-25], [25-29], [30-35], [35+]. Si on prend l'exemple de Highcharts, les couleurs seront donc les 4 buckets, et en ordonnée on verra un total de $ que ces employés coutent à l'entreprise.
+- Avoir une stacked area (https://www.highcharts.com/demo/area-stacked) qui permet de montrer la prévision du cout total des salaires en fonction de la répartition actuelle des employés.
+Si on reprend l'exemple de Highcharts:
+1. Les couleurs seront donc 4 tranches d'âge [-25], [25-29], [30-35], [35+].
+2. En ordonnée on verra un total de $ que ces employés coutent à l'entreprise par an (les salaires sont des salaires mensuels)
+3. En abscisse, on mettra les années de 2000 à 2050 par incrément de 5. Les employés ne changent pas de bucket avec la prévision. On estime qu'en moyenne un employé gagnera 100$ de plus par mois tous les ans (promotion annuelle).
 
 > Vous aurez besoin de récupérer la liste des employés que j'ai mise à jour, elle contient les salaires et le sexe des employés. c'est sur https://github.com/testos944/angular-iut-montreuil-enonce/blob/master/src/assets/employees.json.
 
