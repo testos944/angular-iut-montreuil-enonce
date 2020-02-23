@@ -4,18 +4,6 @@ import { Observable, of } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-
-export class Employee {
-  id: number;
-  lastname: string;
-  name: string;
-  birthdate: string;
-  email: string;
-  adress: string;
-  city: string;
-  phone: string;
-}
-
 export class EmployeeService {
 
   // this is an example in memory. In a real world you would do http calls in this class
@@ -35,4 +23,17 @@ export class EmployeeService {
     this.employeesData = this.employeesData.filter(e => e.id !== id);
     this.employees$ = of(this.employeesData);
   }
+}
+
+export class Employee {
+  id: number;
+  lastname: string;
+  name: string;
+  birthdate: string;
+  email: string;
+  address: string;
+  city: string;
+  phone: string;
+  sex: string;
+  salary: number;
 }

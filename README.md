@@ -28,8 +28,8 @@ Si vous utilisez l'ordi de l'iut vous pouvez passer ce step.
 ## 0° Installation du squelette de l'application
 Exécuter ces commandes
 ```
-git clone https://github.com/testos944/angular-iut-montreuil.git
-cd angular-iut-montreuil
+git clone https://github.com/testos944/angular-iut-montreuil-enonce.git
+cd angular-iut-montreuil-enonce
 npm install
 ```
 
@@ -226,22 +226,168 @@ On a envie de pouvoir changer l'email, la ville d'un employé. On va pouvoir ré
 Il faut aussi ajouter un bouton sur la liste des employés qui nous fasse aller directement à l'édition d'un employé.
 
 > La doc est ici https://angular.io/guide/router#route-parameters
+> Plus de documentation sur RxJs : https://rxjs-dev.firebaseapp.com/api/operators/map, https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap, https://rxjs-dev.firebaseapp.com/api/operators/filter
+
+On veut aussi après avoir édité / créé l'employé, que l'application retourne à la liste des employés.
+
+> Ceci peut s'écrire comme ça:
+```
+    // go back to /employees
+    this.router.navigate(['/employees']);
+```
+
+> Attention à ne pas avoir l'employé qui se met à jour lorsqu'on n'a pas encore appuyé sur "submit". Indice, on peut utiliser le "spread" operator pour copier un objet en Javascript/Typescript comme ceci: `let toto = { ... employee}`. Ceci va créer une nouvelle variable toto qui contient une copie des propriétés de employee. ça évite d'avoir fait une simple copie de référence qui fait que lorsqu'on MAJ toto ça MAJ employee aussi.
 
 11. Mini refacto. On a un composant qui fait trop de choses. employee-create est a la fois utilisé pour éditer et pour créer un nouvel employé.
 
-- Vous allez créer deux nouveaux composants : employee-form et employee-edit.
-- employee-form sera réutilisé par employee-create et employee edit
-- employee-form prend en paramètre un employee
-- employee-create s'occupe d'initialiser un employee vide
-- employee-edit s'occupe de récupérer l'employee via l'id passé en paramètre
-- employee-create et employee-edit sont toujours les composants utilisés dans les routes
+- Vous allez créer deux nouveaux composants : employee-form et employee-edit (rappel de la fonction de scaffolding : `npm run ng g component NOM-DU-COMPOSANT-ICI`).
+- employee-form sera réutilisé par employee-create et employee edit de la manière qui suit:
+> extrait du template html employee create (pas besoin de modifier le template, mais le .ts si.)
+```
+<app-employee-form [model]="employee" (onModelChange)="createEmployee($event)"></app-employee-form>
+```
+- employee-form prend un paramètre 'model' un employee (qui est une variable déclarée sur son parent), et émet un evenement à son parent via la fonction 'onModelChange'. La fonction 'createEmployee' est déclarée sur son parent. Le paramètre $event contiendra un employee.
+> extrait de employee-form.ts
+```
+export class EmployeeFormComponent implements OnInit {
+  // ici on déclare attendre un input de type Employee. Le parent de employee-form lui passera en paramètre
+  @Input('model') model: Employee;
+  // ici on déclare attendre une fonction qui permettra de notifier le parent (pattern observable/observer) dès qu'on click sur on submit
+  @Output('onModelChange') onChange: EventEmitter<Employee> = new EventEmitter<Employee>();
+
+  [....]
+  onSubmit() {
+    this.onChange.emit(this.model);
+  }
+
+```
+- employee-create s'occupe d'initialiser un employee vide et le passe à employee-form; puis attend le clic sur submit pour créer l'employé
+- employee-edit s'occupe de récupérer l'employee via l'id passé en paramètre, puis attend le clic sur on submit pour changer l'employé.
+- employee-form conserve la logique de filtration des villes, et des dates pour le datepicker
+- employee-create et employee-edit sont les composants déclarés dans les routes de creation et edition
 
 > C'est la base de l'architecture des composants, employee-form est un dumb component, c'est à dire passif. Il n'a pas à savoir comment les données lui sont passées. Les deux autres composants sont des smart components, qui ne font que retrouver la donnée, mais ils ne s'occupent pas du côté présentation (c'est le dumb component qui s'en occupe).
 
-> Indice: vous aurez besoin du two-way data binding de angular: https://angular.io/guide/template-syntax#two-way-binding-
+12. On veut ajouter un système de "sort" des employés dans la liste.
 
-En effet, employee-create et employee-edit auront un "enfant" composant employee-form.
+Implémenter les 3 boutons suivants pour sort la liste par: Id (le sort par défaut), Name; DateOfBirth.
+On doit pouvoir sort dans l'ordre inverse si on clique une seconde fois sur l'un des boutons. Ces boutons vont se situer dans le composant employee-list-component
 
-Dans employee form, vous devrez utiliser @Input() et @Output()...
-Dans les parents, quelequchose comme ceci: ```<app-employee-form [(employee)]="getEmployee()"></app-employee-form> ```
-Le getEmployee() doit être différent pour le employee-create-component et le employee-edit-componet
+Note: on va créer une nouvelle méthode dans le service dont la signature est la suivante:
+```
+getSortedEmployees(sortBy: string, ascending: boolean): Observable<Employee[]>
+```
+
+> Documentation javascript de la methode sort: https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/sort
+
+> Attention, l'alternance des couleurs, la suppression et l'édition doivent tjs fonctionner après cette feature de sort.
+
+13. Checklist
+
+Avant de passer à l'étape suivante, pour avoir un maximum de points, assurez vous de ne pas avoir les bugs suivants:
+- A la création de l'employé, il faut bien que chaque employé ait son propre id. (Il peut y avoir un petit bug qui fait qu'on pense qu'on ajoute un nouvel employé mais en fait on le garde par référence et on ajoute plein de fois le même dans la liste)
+- Lorsqu'on édite un employé, tant qu'on n'a pas appuyé sur "submit", l'employé ne doit pas avoir été changé dans la liste.
+- Si je supprime un employé, dans la liste, il y a toujours une alternance de couleurs entre
+
+Avoir les features suivantes:
+- Avoir bien séparé edit et create dans leur propre composant, c'est le plus important dans la notation jusqu'ici, avec @Input() et @Output().
+- Automatiquement retourner à la liste des employés après edit / creation
+- Ne pas permettre d'éditer le nom et le prénom de l'employé dans l'edit, mais à la creation c'est possible
+- pouvoir sort by id, name, dateOfBirth, ascending et descending
+
+## Partie C, Ajout d'une librairie tierce pour montrer des statistiques sur nos employés
+
+Pour cette partie, vous avez déjà des exemples de code de tout ce qui est nécessaire avec les TP d'avant. Du coup je vous aide beaucoup moins, sauf si vous avez des stacktraces horribles.
+
+On veut pouvoir traquer nos employés. Nous allons pour cela utiliser une librairie tierce qui s'appelle Highcharts. Il faut notamment:
+- Avoir un Pie Chart https://www.highcharts.com/demo/pie-legend qui montre les répartition par ville des employés. N'hesitez pas à changer les villes comme cela vous change dans le fichier employees.json pour avoir des trucs différents de la génération par défaut.
+- Avoir un line chart (https://www.highcharts.com/demo/line-labels) avec en en abscisse les années de naissance des employés et en ordonnée la quantité de ceux ci. Il faut une ligne pour les hommes et une pour les femmes. Bonus: ajouter un bouton pour pouvoir merge les hommes et les femmes sur le line chart pour n'avoir qu'une seule ligne.
+- Avoir une stacked area (https://www.highcharts.com/demo/area-stacked) qui permet de montrer le cout total des salaires en fonction de la répartition des employés dans 4 buckets d'âge [-25], [25-29], [30-35], [35+]. Si on prend l'exemple de Highcharts, les couleurs seront donc les 4 buckets, et en ordonnée on verra un total de $ que ces employés coutent à l'entreprise.
+
+> Vous aurez besoin de récupérer la liste des employés que j'ai mise à jour, elle contient les salaires et le sexe des employés. c'est sur https://github.com/testos944/angular-iut-montreuil-enonce/blob/master/src/assets/employees.json.
+
+> Il vous faudra coder plusieurs fonctions pour récuperer les employés, les grouper, etc. Je vous remets la doc de RxJs qui permet de bosser avec les observables de angular: https://rxjs-dev.firebaseapp.com/api/operators/map, https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap, https://rxjs-dev.firebaseapp.com/api/operators/filter
+
+1. Pour ajouter highcharts, on va ajouter la librairie à notre projet:
+`npm install highcharts --save`
+2. On va ensuite créer un composant générique qui permet juste de contenir un chart
+`npm run ng g component highcharts-container`
+> Exemple du .ts à adapter, je l'ai piqué sur https://www.highcharts.com/blog/post/highcharts-and-angular-7/
+```
+import { Component, OnInit } from '@angular/core';
+import * as Highcharts from 'highcharts';
+
+declare var require: any;
+let Boost = require('highcharts/modules/boost');
+let noData = require('highcharts/modules/no-data-to-display');
+let More = require('highcharts/highcharts-more');
+
+Boost(Highcharts);
+noData(Highcharts);
+More(Highcharts);
+
+@Component({
+  selector: 'app-highcharts-container',
+  templateUrl: './highcharts-container.component.html',
+  styleUrls: ['./highcharts-container.component.css']
+})
+export class HighchartsContainerComponent implements OnInit {
+  // options seront supprimées et passées par input après que vous vous assurez que l'exemple fonctionne
+  public options: any = {
+    chart: {
+      type: 'scatter',
+      height: 700
+    },
+    title: {
+      text: 'Sample Scatter Plot'
+    },
+    credits: {
+      enabled: false
+    },
+    tooltip: {
+      formatter: function() {
+        return 'x: ' + Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x) + 'y: ' + this.y.toFixed(2);
+      }
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        formatter: function() {
+          return Highcharts.dateFormat('%e %b %y', this.value);
+        }
+      }
+    },
+    series: [
+      {
+        name: 'Normal',
+        turboThreshold: 500000,
+        data: [[new Date('2018-01-25 18:38:31').getTime(), 2]]
+      },
+      {
+        name: 'Abnormal',
+        turboThreshold: 500000,
+        data: [[new Date('2018-02-05 18:38:31').getTime(), 7]]
+      }
+    ]
+  }
+  constructor() { }
+
+  ngOnInit(){
+    Highcharts.chart('container', this.options);
+  }
+}
+```
+> le .html
+```
+<div id="container">
+```
+> Le div id="container" sera remplacé par la librairie Highcharts qui remplacera ça par ses charts
+> Les options seront passées en @Input() par le composant parent. Ici le type est any c'est pour dire qu'on n'a pas besoin de typer la variable. Le composant exemple est juste pour tester que vous voyez bien qqchose au debut.
+3. Ajouter d'un menu dans l'application qui va sur la sous page "charts", qui contiendra les 3 charts necessaires
+4. Je vous conseille d'avoir 1 composant par chart qu'on souhaite avoir, c'est ce composant qui va se charger de récuperer les employés et de les passer à son fils `highcharts-container`
+5. Je vous conseille aussi d'avoir deux @Input() sur `highcharts-container`: un pour les options sans les series, et un pour les series. On pourra ensuite faire un merge des deux avec
+```
+let optionsAndSeries = {...options, ...series}
+```
+C'est un peu plus propre.
+6. Bon courage!
